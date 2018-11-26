@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Lot of Red Square</title>
+</head>
+<body>
+    <h1>Lot of Red Square</h1>
+    <canvas id="tutoriel" width="500" height="500" style="border: solid 1px"></canvas>
+    <script>
+        var interval, size=50, nb=10, squares = [];
+
+        function square(x0, y0){
+            this.x=x0;
+            this.y=y0;
+            this.can_move=false;
+            this.clear = function(){
+                let canvas = document.getElementById('tutoriel');
+                if (canvas.getContext){
+                    let ctx = canvas.getContext('2d');
+                    ctx.clearRect(this.x, this.y, size, size);
+                }
+            };
+            this.update = function(){
+                this.x+=10;
+            };
+            this.draw = function(){
+                let canvas = document.getElementById('tutoriel');
+                if (canvas.getContext){
+                    let ctx = canvas.getContext('2d');
+                    ctx.fillStyle = 'rgb(200, 0, 0)';
+                    ctx.fillRect(this.x, this.y, size, size);
+                }
+            };
+            this.is_done = function(){
+                let canvas = document.getElementById('tutoriel');
+                let is = canvas.clientWidth-size <= this.x;
+                if (is) this.can_move = false;
+                return is;
+            };
+        }
+
+        function draw(x, y){
+            for (let i=0 ; i<nb ; i++){
+                squares[i].clear();
+                squares[i].update();
+                squares[i].draw();
+            }
+        }
+
+        function init(){
+            let x=0, y=0;
+            for (let i=0 ; i<nb ; i++){
+                squares.push(new square(x, y+i*(size+10)));
+                squares[i].draw();
+            }
+        }
+
+        function move(){
+            let clear = true, is_start=false;
+            for (let i=0 ; i<nb ; i++){
+                if (squares[i].can_move){
+                    is_start = true;
+                    squares[i].clear();
+                    squares[i].update();
+                    squares[i].draw();
+                    if (!squares[i].is_done()) clear = false;
+                }
+            }
+            if (is_start && clear)
+                clearInterval(interval);
+        }
+
+        init();
+        setTimeout(() => {
+            for (let i=0 ; i<nb ; i++){
+                setTimeout(() => {
+                    squares[i].can_move = true;
+                }, i*1000);
+            }
+            interval = setInterval(move, 100);
+        }, 2000);
+    </script>
+</body>
+</html>
