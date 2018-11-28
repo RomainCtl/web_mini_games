@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Request Animation Frame</title>
+</head>
+<body>
+    <h1>Request Animation Frame</h1>
+    <canvas id="tutoriel" width="500" height="500" style="border: solid 1px"></canvas>
+    <script>
+        window.requestAnimationFrame = window.requestAnimationFrame ||
+            window.webkitRequestAnimationFrame ||
+            window.mozRequestAnimationFrame    ||
+            window.oRequestAnimationFrame      ||
+            window.msRequestAnimationFrame     ||
+            null;
+
+        function squareManager(size, nb, space_between, x_speed, y_speed, interval){
+            this.interval = null;
+            this.size = size;
+            this.space_between = space_between;
+            this.nb = nb;
+            this.squares = [];
+            this.x_speed = x_speed;
+            this.y_speed = y_speed;
+            this.i_speed = interval;
+            this.square = function(x0, y0){
+                this.x=x0;
+                this.y=y0;
+                this.can_move=false;
+                this.clear = function(){
+                    let canvas = document.getElementById('tutoriel');
+                    if (canvas.getContext){
+                        let ctx = canvas.getContext('2d');
+                        ctx.clearRect(this.x, this.y, size, size);
+                    }
+                };
+                this.update = function(xs, ys, is){
+                    is = Math.round(is/1000);
+                    this.x+=xs*is;
+                    this.y+=ys*is;
+                };
+                this.draw = function(){
+                    let canvas = document.getElementById('tutoriel');
+                    if (canvas.getContext){
+                        let ctx = canvas.getContext('2d');
+                        ctx.fillStyle = 'rgb(200, 0, 0)';
+                        ctx.fillRect(this.x, this.y, size, size);
+                    }
+                };
+                this.is_done = function(){
+                    let canvas = document.getElementById('tutoriel');
+                    let is = canvas.clientWidth-size <= this.x;
+                    if (is) this.can_move = false;
+                    return is;
+                };
+            };
+            this.move = function(timestamp, squares){
+                this.pausecomp(300);
+                let clear = true, is_start=false;
+                for (let i=0 ; i<nb ; i++){
+                    if (squares[i].can_move){
+                        is_start = true;
+                        squares[i].clear();
+                        squares[i].update(this.x_speed, this.y_speed, timestamp);
+                        squares[i].draw();
+                        if (!squares[i].is_done()) clear = false;
+                    }
+                }
+                if (!(is_start && clear))
+                    this.interval = window.requestAnimationFrame(timestamp => this.move(timestamp, this.squares));
+            }
+            this.init = function() {
+                let x=0, y=0;
+                for (let i=0 ; i<this.nb ; i++){
+                    this.squares.push(new this.square(x, y+i*(this.size+this.space_between)));
+                    this.squares[i].draw();
+                }
+            }
+            this.pausecomp = function(millis){
+                var date = new Date();
+                var curDate = null;
+                do {
+                    curDate = new Date();
+                } while (curDate-date < millis);
+            }
+            this.start = function(){
+                this.init();
+                setTimeout(() => {
+                    for (let i=0 ; i<nb ; i++){
+                        setTimeout(() => {
+                            this.squares[i].can_move = true;
+                        }, i*1000);
+                    }
+                    this.interval = window.requestAnimationFrame(timestamp => this.move(timestamp, this.squares));
+                }, 2000);
+            }
+        }
+
+        var manager = new squareManager(50, 1, 10, 1, 0, 10);
+        manager.start();
+    </script>
+</body>
+</html>
