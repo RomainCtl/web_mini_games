@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Sprite</title>
+</head>
+<body>
+    <h1>Sprite</h1>
+    <canvas id="tutoriel" width="500" height="500" style="border: solid 1px"></canvas>
+    <script>
+        var img = new Image(),
+            x=-44, y=0;
+        img.src = "./coin-sprite-animation-sprite-sheet.png";
+
+        function clearGame(){
+            let canvas = document.getElementById('tutoriel');
+            if (canvas.getContext){
+                let ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+            }
+        }
+
+        function updateGame(){
+            x+=44;
+            x=x%440;
+        }
+
+        function drawGame(){
+            let canvas = document.getElementById('tutoriel');
+            if (canvas.getContext){
+                let ctx = canvas.getContext('2d');
+                ctx.drawImage(img, x, 0, 44, 40, 10, 10, 55, 50);
+            }
+        }
+
+        var mainloop = function() {
+            clearGame();
+            updateGame();
+            drawGame();
+        };
+
+        var animFrame = window.requestAnimationFrame ||
+                window.webkitRequestAnimationFrame ||
+                window.mozRequestAnimationFrame    ||
+                window.oRequestAnimationFrame      ||
+                window.msRequestAnimationFrame     ||
+                null ;
+
+        var recursiveAnim = function() {
+            mainloop();
+            animFrame( recursiveAnim );
+        };
+
+        // start the mainloop
+        animFrame( recursiveAnim );
+    </script>
+</body>
+</html>
