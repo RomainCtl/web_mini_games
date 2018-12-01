@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Events </title>
+  </head>
+  <body>
+    <h1>Sprite</h1>
+    <canvas id="tutoriel" width="500" height="500" style="border: solid 1px"></canvas>
+  </body>
+<script>
+var img = new Image(),
+    cible = {x:0, y:0},
+    sx=0, sy=0,
+    sw=128, sh=128,
+    dx=0, dy=0,
+    dw=128, dh=128,
+    max_d=500-128;
+img.src = "./hero_walk_cycle_spritesheet_by_mrnoobtastic-d3defej.png";
+
+function clearGame(){
+    let canvas = document.getElementById('tutoriel');
+    if (canvas.getContext){
+        let ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+    }
+}
+
+function updateGame(){
+    move();
+}
+
+function drawGame(){
+    let canvas = document.getElementById('tutoriel');
+    if (canvas.getContext){
+        let ctx = canvas.getContext('2d');
+        ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+    }
+}
+
+var mainloop = function() {
+    clearGame();
+    updateGame();
+    drawGame();
+};
+
+var animFrame = window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame   ||
+        window.mozRequestAnimationFrame      ||
+        window.oRequestAnimationFrame        ||
+        window.msRequestAnimationFrame       ||
+        null;
+
+var recursiveAnim = function() {
+    mainloop();
+    animFrame( recursiveAnim );
+};
+
+// start the mainloop
+animFrame( recursiveAnim );
+
+function init_pos(){
+  sx = sw;
+  sy = sh*2;
+}
+
+function move(){
+  if (cible.x == dx && cible.y == dy) {
+    init_pos();
+    return;
+  }
+  sx+=sw;
+  sx=sx%512;
+  if (cible.y < dy) {
+    sy=sh*3;
+    dy-=10;
+  } else if (cible.y > dy) {
+    sy=sh*2;
+    dy+=10;
+  } else
+  if (cible.x < dx) {
+    sy=0;
+    dx-=10;
+  } else if (cible.x > dx) {
+    sy=sh;
+    dx+=10;
+  }
+
+  if (cible.x > dx && cible.x < dx+10) cible.x = dx+10;
+  if (cible.y > dy && cible.y < dy+10) cible.y = dy+10;
+};
+
+document.getElementById('tutoriel').addEventListener('mousedown', function (e) {
+  if (e.defaultPrevented) return;
+  let x = e.clientX - e.originalTarget.offsetLeft,
+      y = e.clientY - e.originalTarget.offsetTop;
+  cible.x = x <= max_d ? x : max_d;
+  cible.y = y <= max_d ? y : max_d;
+  e.preventDefault();
+});
+
+window.addEventListener("keydown", function (event) {
+  if (event.defaultPrevented) return; // Should do nothing if the key event was already consumed.
+
+  switch (event.key) {
+    case "ArrowDown":
+      cible.y=max_d;
+      cible.x=dx;
+      break;
+    case "ArrowUp":
+      cible.y=0;
+      cible.x=dx;
+      break;
+    case "ArrowLeft":
+      cible.x=0;
+      cible.y=dy;
+      break;
+    case "ArrowRight":
+      cible.x=max_d;
+      cible.y=dy;
+      break;
+    // case "Enter":
+    //   break;
+    // case "Escape":
+    //   break;
+    default:
+      return;
+  }
+  event.preventDefault();
+}, true);
+</script>
+</html>
