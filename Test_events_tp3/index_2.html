@@ -6,16 +6,17 @@
   </head>
   <body>
     <h1>Sprite</h1>
-    <canvas id="tutoriel" width="500" height="500" style="border: solid 1px"></canvas>
+    <canvas id="tutoriel" width="667" height="500" style="background: url(curves1.png) no-repeat; background-size: contain;border: solid 1px"></canvas>
   </body>
 <script>
 var img = new Image(),
-    cible = {x:0, y:0},
+    cible = {x:0, y:1},
     sx=0, sy=0,
     sw=128, sh=128,
     dx=0, dy=0,
     dw=128, dh=128,
-    max_d=500-128;
+    min_dw=0, min_dh=230,
+    max_dw=667-128, max_dh=500-128;
 img.src = "./hero_walk_cycle_spritesheet_by_mrnoobtastic-d3defej.png";
 
 function clearGame(){
@@ -34,7 +35,7 @@ function drawGame(){
     let canvas = document.getElementById('tutoriel');
     if (canvas.getContext){
         let ctx = canvas.getContext('2d');
-        ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+        ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw*(dy+1-min_dh)/210+40, dh*(dy+1-min_dh)/210+40);
     }
 }
 
@@ -66,36 +67,51 @@ function init_pos(){
 
 function move(){
   if (cible.x == dx && cible.y == dy) {
-    init_pos();
+    // init_pos();
     return;
   }
   sx+=sw;
   sx=sx%512;
-  if (cible.y < dy) {
-    sy=sh*3;
-    dy-=10;
-  } else if (cible.y > dy) {
-    sy=sh*2;
-    dy+=10;
-  } else
-  if (cible.x < dx) {
-    sy=0;
-    dx-=10;
-  } else if (cible.x > dx) {
-    sy=sh;
-    dx+=10;
-  }
 
-  if (cible.x > dx && cible.x < dx+10) cible.x = dx+10;
-  if (cible.y > dy && cible.y < dy+10) cible.y = dy+10;
+  if (dy < min_dh) {
+    cible.y=min_dh;
+    dy=min_dh;
+  } else if (dy > max_dh) {
+    cible.y=max_dh;
+    dy=max_dh;
+  } else if (dx < min_dw) {
+    cible.x=min_dw;
+    dx=min_dw;
+  } else if (dx > max_dw) {
+    cible.x=max_dw;
+    dx=max_dw;
+  } else {
+    if (cible.y < dy) {
+      sy=sh*3;
+      dy-=10;
+    } else if (cible.y > dy) {
+      sy=sh*2;
+      dy+=10;
+    } else
+    if (cible.x < dx) {
+      sy=0;
+      dx-=10;
+    } else if (cible.x > dx) {
+      sy=sh;
+      dx+=10;
+    }
+
+    if (cible.x > dx && cible.x < dx+10) cible.x = dx+10;
+    if (cible.y > dy && cible.y < dy+10) cible.y = dy+10;
+  }
 };
 
 document.getElementById('tutoriel').addEventListener('mousedown', function (e) {
   if (e.defaultPrevented) return;
   let x = e.clientX - e.originalTarget.offsetLeft,
       y = e.clientY - e.originalTarget.offsetTop;
-  cible.x = x <= max_d ? x : max_d;
-  cible.y = y <= max_d ? y : max_d;
+  cible.x = x <= max_dw ? x : max_dw;
+  cible.y = y <= max_dh ? y : max_dh;
   e.preventDefault();
 });
 
@@ -104,19 +120,19 @@ window.addEventListener("keydown", function (event) {
 
   switch (event.key) {
     case "ArrowDown":
-      cible.y=max_d;
+      cible.y=cible.y+10 <= max_dh ? dy+10 : max_dh;//max_d;
       cible.x=dx;
       break;
     case "ArrowUp":
-      cible.y=0;
+      cible.y=cible.y-10 >= min_dh ? dy-10 : min_dh;//0;
       cible.x=dx;
       break;
     case "ArrowLeft":
-      cible.x=0;
+      cible.x=cible.x-10 >= min_dw ? dx-10 : min_dw;//0;
       cible.y=dy;
       break;
     case "ArrowRight":
-      cible.x=max_d;
+      cible.x=cible.x+10 <= max_dw ? dx+10 : max_dw;//max_d;
       cible.y=dy;
       break;
     // case "Enter":
