@@ -10,8 +10,8 @@ var start = null;
 var divArena;
 var canArena;
 var conArena;
-var ArenaWidth = 500;
-var ArenaHeight = 300;
+var ArenaWidth = 900;
+var ArenaHeight = 540;
 
 //Background
 var imgBackground;
@@ -70,8 +70,8 @@ var xPlayer = 20,
     yPlayer = 100,
     PlayerImgY = 0;
 const yPlayerSpeed = 4,
-    PlayerHeight = 15,
-    PlayerWidth = 32,
+    PlayerHeight = 29,
+    PlayerWidth = 64,
     PlayerImgHeight = 29,
     PlayerImgWidth = 64;
 /////////////////////////////////
@@ -105,19 +105,7 @@ function Hatch(x, y){
         return true;
     };
     this.draw = function(){
-        conArena.drawImage(this.img, this.imgx, this.imgy, HatchWidth, HatchHeight, this.x, this.y, HatchWidth/2, HatchHeight/2);
-    };
-    this.collision = function(tabOfObjects){
-        for(let index=0; index<tabOfObjects.length; index++){
-            if (this.x < tabOfObjects[index].x + tabOfObjects[index].width &&
-                this.x + this.width > tabOfObjects[index].x &&
-                this.y < tabOfObjects[index].y + tabOfObjects[index].height &&
-                this.height + this.y > tabOfObjects[index].y) {
-                    // collision detected!
-                    return true;
-            }
-        }
-        return false;
+        conArena.drawImage(this.img, this.imgx, this.imgy, HatchWidth, HatchHeight, this.x, this.y, HatchWidth, HatchHeight);
     };
 }
 /////////////////////////////////
@@ -166,7 +154,7 @@ function Enemy(x,y) {
         return true;
     };
     this.draw = function(){
-        conArena.drawImage(this.img, this.imgx, this.imgy, EnemyWidth, EnemyHeight, this.x, this.y, EnemyWidth/2, EnemyHeight/2);
+        conArena.drawImage(this.img, this.imgx, this.imgy, EnemyWidth, EnemyHeight, this.x, this.y, EnemyWidth, EnemyHeight);
     };
     this.collision = function(tabOfObjects){
         for(let index=0; index<tabOfObjects.length; index++){
@@ -211,7 +199,7 @@ function Explosion(x, y){
         } else return false
     };
     this.draw = function(){
-        conArena.drawImage(this.img, this.imgx, this.imgy, this.width, this.height, this.x, this.y, this.width/4, this.height/4);
+        conArena.drawImage(this.img, this.imgx, this.imgy, this.width, this.height, this.x, this.y, this.width/2, this.height/2);
     };
 }
 /////////////////////////////////
@@ -246,12 +234,10 @@ function updateItems(p) {
                 hatchs.push(new Hatch(xPlayer+PlayerWidth, yPlayer+4));
         }
     }
-    for(let h in hatchs) {
-        let res = hatchs[h].update(p),
-            hit = hatchs[h].collision(enemys);
-        if (res == false || hit == true)
+    for(let h in hatchs)
+        if (hatchs[h].update(p) == false)
             hatchs.splice(h,1);
-    }
+
     for(let en in enemys) {
         let res = enemys[en].update(p),
             hit = enemys[en].collision(hatchs); // TODO check Player collision
