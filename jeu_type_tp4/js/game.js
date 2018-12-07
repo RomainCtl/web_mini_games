@@ -69,7 +69,7 @@ imgPlayer.src = "./assets/Ship/Spritesheet_64x29.png";
 var xPlayer = 20,
     yPlayer = 100,
     PlayerImgY = 0;
-const yPlayerSpeed = 10,
+const yPlayerSpeed = 4,
     PlayerHeight = 15,
     PlayerWidth = 32,
     PlayerImgHeight = 29,
@@ -236,18 +236,15 @@ function updateItems(p) {
     let keycode;
     for (keycode in keyStatus) {
         if(keyStatus[keycode] == true){
-            if(keycode == keys.UP) {
-                if (yPlayer > 0) yPlayer -= yPlayerSpeed;
-            }
-            if(keycode == keys.DOWN) {
-                if (yPlayer < ArenaHeight - PlayerHeight) yPlayer += yPlayerSpeed;
-            }
-            if(keycode == keys.SPACE) {
-                //shoot
+            if(keycode == keys.UP && yPlayer > 0)
+                yPlayer -= yPlayerSpeed;
+
+            if(keycode == keys.DOWN && yPlayer < ArenaHeight - PlayerHeight)
+                yPlayer += yPlayerSpeed;
+
+            if(keycode == keys.SPACE && p)
                 hatchs.push(new Hatch(xPlayer+PlayerWidth, yPlayer+4));
-            }
         }
-        keyStatus[keycode] = false;
     }
     for(let h in hatchs) {
         let res = hatchs[h].update(p),
