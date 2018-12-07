@@ -4,6 +4,7 @@ var animFrame = window.requestAnimationFrame ||
             window.oRequestAnimationFrame      ||
             window.msRequestAnimationFrame     ||
             null;
+var start = null;
 
 //Canvas
 var divArena;
@@ -94,10 +95,12 @@ function Hatch(x, y){
     this.clear = function(){
         conArena.clearRect(this.x,this.y,HatchWidth,HatchHeight);
     };
-    this.update = function(){
+    this.update = function(p){
         this.x += HatchSpeed;
-        this.imgy += HatchHeight;
-        this.imgy = this.imgy%(4*HatchHeight);
+        if (p) {
+            this.imgy += HatchHeight;
+            this.imgy = this.imgy%(4*HatchHeight);
+        }
         if (this.x >= ArenaWidth + HatchHeight) return false;
         return true;
     };
@@ -148,15 +151,17 @@ function Enemy(x,y) {
     this.clear = function(){
         conArena.clearRect(this.x,this.y,EnemyWidth,EnemyHeight);
     };
-    this.update = function(){
+    this.update = function(p){
         let r = Math.random();
         if (r <= 0.4) {
             if (r <= 0.2 && this.y > 0) this.y -= EnemyYSpeed;
             else if (this.y < ArenaHeight - EnemyHeight) this.y += EnemyYSpeed;
         }
         this.x -= EnemyXSpeed;
-        this.imgy += EnemyHeight;
-        this.imgy = this.imgy%(4*EnemyHeight);
+        if (p) {
+            this.imgy += EnemyHeight;
+            this.imgy = this.imgy%(4*EnemyHeight);
+        }
         if (this.x < 0) return false;
         return true;
     };
@@ -199,9 +204,11 @@ function Explosion(x, y){
     this.clear = function(){
         conArena.clearRect(this.x,this.y,this.width,this.height);
     };
-    this.update = function(){
-        this.imgx += ExplosionWidth;
-        return this.imgx >= ExplosionWidth *10;
+    this.update = function(p){
+        if (p) {
+            this.imgx += ExplosionWidth;
+            return this.imgx >= ExplosionWidth *10;
+        } else return false
     };
     this.draw = function(){
         conArena.drawImage(this.img, this.imgx, this.imgy, this.width, this.height, this.x, this.y, this.width/4, this.height/4);
@@ -214,11 +221,13 @@ function updateScene() {
     "use strict";
     xBackgroundOffset = (xBackgroundOffset - xBackgroundSpeed) % backgroundWidth;
 }
-function updateItems() {
+function updateItems(p) {
     "use strict";
     clearItems();
-    PlayerImgY += PlayerImgHeight;
-    PlayerImgY = PlayerImgY%(PlayerImgHeight*4);
+    if (p) {
+        PlayerImgY += PlayerImgHeight;
+        PlayerImgY = PlayerImgY%(PlayerImgHeight*4);
+    }
 
     // Enemy generation
     if (Math.random() <= 0.01)
@@ -241,13 +250,13 @@ function updateItems() {
         keyStatus[keycode] = false;
     }
     for(let h in hatchs) {
-        let res = hatchs[h].update(),
+        let res = hatchs[h].update(p),
             hit = hatchs[h].collision(enemys);
         if (res == false || hit == true)
             hatchs.splice(h,1);
     }
     for(let en in enemys) {
-        let res = enemys[en].update(),
+        let res = enemys[en].update(p),
             hit = enemys[en].collision(hatchs); // TODO check Player collision
         if (res == false)
             end();
@@ -257,7 +266,7 @@ function updateItems() {
         }
     }
     for (let ex in explosions)
-        if (explosions[ex].update() == true)
+        if (explosions[ex].update(p) == true)
             explosions.splice(ex, 1);
 }
 function drawScene() {
@@ -285,10 +294,10 @@ function clearItems() {
         explosions[ex].clear();
 }
 
-function updateGame() {
+function updateGame(p) {
     "use strict";
     updateScene();
-    updateItems();
+    updateItems(p);
 }
 
 function drawGame() {
@@ -298,15 +307,18 @@ function drawGame() {
 }
 
 
-function mainloop () {
+function mainloop (p) {
     "use strict";
-    updateGame();
+    updateGame(p);
     drawGame();
 }
 
-function recursiveAnim () {
+function recursiveAnim (timestamp) {
     "use strict";
-    mainloop();
+    if (start == null) start = timestamp;
+    let progress = timestamp - start;
+    if (progress > 100) start = timestamp;
+    mainloop(progress > 100);
     if (status == _Status.IN_GAME) animFrame( recursiveAnim );
 }
 
